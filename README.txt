@@ -71,3 +71,31 @@ Tyne and Wear Museums Collections (Imagine) http://ckan.net/package/twam_imagine
 Cambridge University Library dataset #1 http://ckan.net/package/culds_1 culds_1 MARC, N3    http://data.lib.cam.ac.uk/endpoint.php?query=SELECT+*+WHERE+{%0D%0A++GRAPH+%3Chttp%3A%2F%2Fdata.lib.cam.ac.uk%2Fcontext%2Fdataset%2Fcambridge%2Fbib%3E+{+%3Fs+%3Fp+%3Fo+.+}%0D%0A}%0D%0ALIMIT+1000&output=htmltab&jsonp=&key=&show_inline=1 http://data.lib.cam.ac.uk/datasets.php
 JISC MOSAIC Activity Data http://ckan.net/package/jisc_mosaic jisc_mosaic XML http://library.hud.ac.uk/mosaic/api.pl    http://www.daveyp.com/blog/archives/953
 OpenURL Router Data (EDINA) http://ckan.net/package/openurl-router-data openurl-router-data CSV     http://openurl.ac.uk/doc/data/data.html
+
+RUNNING the CODES
+I.) bnb2solr.xsl
+----------------
+1) Purpose: index British National Bibliography with Apache Solr
+2) Preparing: 
+* download the BNB from ckan
+* extract the XML files
+* download Apache Solr 3.3
+* extract it to a convenient place
+* $ cd to path/to/apache solr
+* $ cd examples
+* $ java -jar start.jar
+* download latest saxon9he XSLT processor from SourceForge (http://sourceforge.net/projects/saxon/files/Saxon-HE/9.3/)
+* extract it to a convenient place
+
+3) Run conversation from XML to JSON:
+cd the/directory/where/BNB/files/exist
+for file in BNBrdfdc[0-9][0-9].xml
+do
+java -Xms500M -Xmx3024M -jar /path/to/saxon9he.jar -t -s:$file -xsl:/path/to/celebrate_liberation/bnb2solr.xsl > $file.json
+done
+
+4) Run indexing with Solr:
+for file in BNBrdfdc[0-9][0-9].xml.json
+do
+curl 'http://localhost:8983/solr/update/json?commit=true' --data-binary @$file -H 'Content-type:application/json'
+done
